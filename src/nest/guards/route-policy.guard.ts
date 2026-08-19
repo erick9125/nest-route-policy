@@ -32,6 +32,8 @@ export class RoutePolicyGuard implements CanActivate {
       return true;
     }
 
+    // Throws on non-HTTP contexts, where the transport payload would otherwise
+    // pass itself off as the request. See AuthorizationContextFactory.
     const authorizationContext = await this.contextFactory.create(context, policy);
     const result = await this.evaluator.evaluate(policy, authorizationContext);
 

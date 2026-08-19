@@ -34,6 +34,8 @@ export type { ResourceRegistration } from './registry/resource-registry.js';
 export { PolicyEvaluationException } from './errors/policy-evaluation.error.js';
 export { ResourceResolverNotFoundError } from './errors/resource-resolver-not-found.error.js';
 export { PolicyHandlerNotFoundError } from './errors/policy-handler-not-found.error.js';
+export { MissingObjectCheckError } from './errors/missing-object-check.error.js';
+export { UnsupportedExecutionContextError } from './errors/unsupported-execution-context.error.js';
 
 export { evaluatePolicy } from './testing/authorization-test-builder.js';
 export type { EvaluatePolicyInput } from './testing/authorization-test-builder.js';

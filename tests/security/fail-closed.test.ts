@@ -67,7 +67,7 @@ class MissingHandlerController {
 @Controller('exploding')
 class ExplodingController {
   @Get(':id')
-  @Authorize({ resource: 'invoice', action: 'read' })
+  @Authorize({ resource: 'invoice', action: 'read', tenant: true })
   read(): string {
     return 'should-not-run';
   }
