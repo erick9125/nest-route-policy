@@ -1,3 +1,4 @@
+import { MissingObjectCheckError } from '../../errors/missing-object-check.error.js';
 import type { RoleMode, RoutePolicy, ScopeMode } from '../models/route-policy.js';
 
 export interface PolicyDefaults {
@@ -15,6 +16,7 @@ export interface ComposedRoutePolicy {
   readonly handlers: readonly string[];
   readonly roleMode: RoleMode;
   readonly scopeMode: ScopeMode;
+  readonly unsafeSkipObjectCheck: boolean;
 }
 
 export class PolicyComposer {
@@ -49,7 +51,7 @@ export class PolicyComposer {
       roleGroups.push(methodPolicy.roles);
     }
 
-    return {
+    const composed: ComposedRoutePolicy = {
       roleGroups,
       scopes: unique([...(classPolicy?.scopes ?? []), ...(methodPolicy?.scopes ?? [])]),
       tenant: classPolicy?.tenant === true || methodPolicy?.tenant === true,
@@ -57,9 +59,32 @@ export class PolicyComposer {
       handlers: unique([...(classPolicy?.handlers ?? []), ...(methodPolicy?.handlers ?? [])]),
       roleMode,
       scopeMode,
+      unsafeSkipObjectCheck:
+        classPolicy?.unsafeSkipObjectCheck === true ||
+        methodPolicy?.unsafeSkipObjectCheck === true,
       ...(resource !== undefined ? { resource } : {}),
       ...(action !== undefined ? { action } : {}),
     };
+
+    PolicyComposer.assertObjectCheck(composed);
+
+    return composed;
+  }
+
+  /**
+   * A policy that names a resource but checks nothing about it is the BOLA hole
+   * this package exists to close, so it fails closed instead of allowing.
+   * `action` is descriptive metadata and never counts as a check.
+   */
+  private static assertObjectCheck(policy: ComposedRoutePolicy): void {
+    if (policy.resource === undefined || policy.unsafeSkipObjectCheck) {
+      return;
+    }
+
+    const checksResource = policy.tenant || policy.ownership || policy.handlers.length > 0;
+    if (!checksResource) {
+      throw new MissingObjectCheckError(policy.resource);
+    }
   }
 }
 

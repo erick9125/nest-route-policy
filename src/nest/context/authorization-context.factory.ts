@@ -3,6 +3,7 @@ import type { ExecutionContext } from '@nestjs/common';
 import type { AuthorizationContext } from '../../core/models/authorization-context.js';
 import type { ComposedRoutePolicy } from '../../core/composition/policy-composer.js';
 import { PolicyEvaluationException } from '../../errors/policy-evaluation.error.js';
+import { UnsupportedExecutionContextError } from '../../errors/unsupported-execution-context.error.js';
 import { ResourceRegistry } from '../../registry/resource-registry.js';
 import { PRINCIPAL_RESOLVER, ROUTE_POLICY_RESOURCE } from '../constants.js';
 import type { PrincipalResolver } from '../resolvers/principal-resolver.js';
@@ -18,6 +19,14 @@ export class AuthorizationContextFactory {
     executionContext: ExecutionContext,
     policy: ComposedRoutePolicy,
   ): Promise<AuthorizationContext> {
+    // Outside HTTP, `switchToHttp().getRequest()` hands back the transport
+    // payload, so a caller-supplied message could pass itself off as the
+    // request and its `user` as an authenticated principal. Fail closed.
+    const contextType = executionContext.getType<string>();
+    if (contextType !== 'http') {
+      throw new UnsupportedExecutionContextError(contextType);
+    }
+
     const request = executionContext.switchToHttp().getRequest<Record<PropertyKey, unknown>>();
     const principal = await this.principalResolver.resolve(executionContext);
     const params = readStringRecord(request['params']);

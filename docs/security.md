@@ -35,6 +35,21 @@ Unknown handlers, unknown resource types, and thrown resolvers do not allow
 access. A thrown resolver is an error, not a deny decision, and must not be
 caught and turned into `return true`.
 
+Two more configurations fail closed rather than allowing:
+
+- **A policy that names `resource` but checks nothing about the object.**
+  Without `tenant`, `ownership`, or a handler, the guard would load the row and
+  hand it to any authenticated caller — the BOLA hole this package exists to
+  close. It raises `MissingObjectCheckError`. `action` is descriptive metadata
+  and never counts as a check. `unsafeSkipObjectCheck: true` is the explicit,
+  auditable opt-out.
+- **A policy reached on a non-HTTP execution context.** On `rpc`, `ws`, and
+  `graphql`, `switchToHttp().getRequest()` returns the transport payload, so a
+  caller-supplied message could present its own `user` as an authenticated
+  principal. Policies are HTTP-only in `0.1.x` and raise
+  `UnsupportedExecutionContextError` elsewhere. Handlers with no `@Authorize()`
+  are unaffected on any transport.
+
 ## Logging
 
 Safe to log: policy, action, resource type, decision, reason code.

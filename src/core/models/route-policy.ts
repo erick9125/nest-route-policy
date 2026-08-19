@@ -11,4 +11,11 @@ export interface RoutePolicy {
   readonly handlers?: readonly string[];
   readonly roleMode?: RoleMode;
   readonly scopeMode?: ScopeMode;
+  /**
+   * Declaring `resource` without `tenant`, `ownership`, or a handler loads the
+   * object and hands it to the route without any object-level check, which is
+   * the BOLA / IDOR class of bug this package exists to prevent. That policy is
+   * rejected unless this flag opts out of the check on purpose.
+   */
+  readonly unsafeSkipObjectCheck?: boolean;
 }

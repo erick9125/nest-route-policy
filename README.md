@@ -357,6 +357,48 @@ and foreign ids do not leak existence.
 If the resolver throws (database down), the error propagates. That is an
 infrastructure failure, not a deny decision.
 
+### A resource policy must check something about the object
+
+Naming a resource loads the row and hands it to the route. It does not, by
+itself, decide anything about it. A policy that names `resource` therefore has
+to pair it with at least one object-level check — `tenant`, `ownership`, or a
+handler — or it is rejected with `MissingObjectCheckError`:
+
+```ts
+// ❌ MissingObjectCheckError: loads the invoice, checks nothing about it
+@Authorize({ resource: 'invoice', action: 'read' })
+
+// ❌ roles and scopes gate the route, not the object
+@Authorize({ resource: 'invoice', action: 'read', roles: ['admin'] })
+
+// ✅ any one of these is a real object-level check
+@Authorize({ resource: 'invoice', tenant: true })
+@Authorize({ resource: 'invoice', ownership: true })
+@Authorize({ resource: 'invoice', handlers: ['invoice.canRead'] })
+```
+
+The check may come from either layer: `resource` on the controller and
+`ownership: true` on the method compose into a valid policy.
+
+`action` is **descriptive metadata**. It reaches handlers as `context.action`
+and shows up in deny logs, and it never denies anything on its own. Do not
+read `action: 'read'` as a restriction.
+
+If a route genuinely needs `resource` with no object check — say it is gated by
+roles alone and only wants `@AuthorizedResource()` to avoid a second query —
+say so explicitly:
+
+```ts
+@Authorize({
+  resource: 'invoice',
+  roles: ['admin'],
+  unsafeSkipObjectCheck: true,
+})
+```
+
+The flag is deliberately unpleasant to read, because every use of it is a route
+where changing an id in the URL is checked by nothing.
+
 ---
 
 ## Custom policies
@@ -442,6 +484,12 @@ keeps that check.
 - No `@Authorize()` metadata → the guard does not intervene.
 - `@Authorize()` present → deny unless every requirement passes.
 - Combination is AND: principal, roles, scopes, tenant, ownership, handlers.
+- A policy naming `resource` must also check the object (`tenant`, `ownership`,
+  or a handler), or it fails closed. `action` is metadata and never denies.
+- Policies are evaluated for HTTP contexts only. On any other transport
+  (`rpc`, `ws`, `graphql`) a route that carries a policy fails closed, because
+  there the transport payload — not the HTTP request — is what the guard would
+  read `user` from.
 - Authorization failures return **403 Forbidden** with body
   `{ "statusCode": 403, "message": "Forbidden" }`.
 - Internal reason codes (`TENANT_MISMATCH`, `OWNERSHIP_MISMATCH`, …) stay out
@@ -467,6 +515,8 @@ behavior this package exists to make routine.
 | Resource resolver returns `null` | `403` deny |
 | Unknown resource type or handler | error (typically `500`) |
 | Resolver / handler throws | error (typically `500`) |
+| `resource` without an object-level check | `MissingObjectCheckError` (typically `500`) |
+| Policy on a non-HTTP context | `UnsupportedExecutionContextError` (typically `500`) |
 
 Deny is a valid negative decision. An infrastructure failure is not rewritten
 into a deny, and it is never rewritten into an allow.
