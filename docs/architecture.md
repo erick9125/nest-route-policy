@@ -29,9 +29,11 @@ request.user  (AuthorizationPrincipal)
         ↓
 RoutePolicyGuard
         ↓
-resource resolver (optional)
+claims phase: principal, roles, scopes   (in memory, no I/O)
         ↓
-PolicyEvaluator
+resource resolver (only if the claims passed)
+        ↓
+resource phase: tenant, ownership, handlers
         ↓
 ALLOW or RoutePolicyDeniedException (403)
 ```

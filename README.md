@@ -484,6 +484,10 @@ keeps that check.
 - No `@Authorize()` metadata → the guard does not intervene.
 - `@Authorize()` present → deny unless every requirement passes.
 - Combination is AND: principal, roles, scopes, tenant, ownership, handlers.
+- Evaluation runs in two phases. Principal, roles, and scopes are settled first,
+  in memory. Only if they pass does the resource resolver run, followed by
+  tenant, ownership, and handlers. A denied caller therefore costs no query and
+  cannot tell an existing id from a missing one.
 - A policy naming `resource` must also check the object (`tenant`, `ownership`,
   or a handler), or it fails closed. `action` is metadata and never denies.
 - Policies are evaluated for HTTP contexts only. On any other transport
@@ -517,6 +521,8 @@ behavior this package exists to make routine.
 | Resolver / handler throws | error (typically `500`) |
 | `resource` without an object-level check | `MissingObjectCheckError` (typically `500`) |
 | Policy on a non-HTTP context | `UnsupportedExecutionContextError` (typically `500`) |
+| `@AuthorizedResource()` with no resource loaded | `AuthorizedResourceUnavailableError` (typically `500`) |
+| More than one `@Authorize()` on the same target | `DuplicateRoutePolicyError` at module load |
 
 Deny is a valid negative decision. An infrastructure failure is not rewritten
 into a deny, and it is never rewritten into an allow.

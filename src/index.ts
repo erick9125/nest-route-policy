@@ -36,6 +36,8 @@ export { ResourceResolverNotFoundError } from './errors/resource-resolver-not-fo
 export { PolicyHandlerNotFoundError } from './errors/policy-handler-not-found.error.js';
 export { MissingObjectCheckError } from './errors/missing-object-check.error.js';
 export { UnsupportedExecutionContextError } from './errors/unsupported-execution-context.error.js';
+export { AuthorizedResourceUnavailableError } from './errors/authorized-resource-unavailable.error.js';
+export { DuplicateRoutePolicyError } from './errors/duplicate-route-policy.error.js';
 
 export { evaluatePolicy } from './testing/authorization-test-builder.js';
 export type { EvaluatePolicyInput } from './testing/authorization-test-builder.js';

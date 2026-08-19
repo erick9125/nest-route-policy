@@ -153,3 +153,97 @@ describe('PolicyEvaluator', () => {
     ).rejects.toThrow('database unavailable');
   });
 });
+
+describe('PolicyEvaluator phases', () => {
+  it('evaluateClaims checks the principal, roles, and scopes only', () => {
+    const result = createEvaluator().evaluateClaims(
+      PolicyComposer.from({ roles: ['admin'], scopes: ['invoice:export'] }),
+      context(),
+    );
+
+    expect(result.violations.map((violation) => violation.type)).toEqual([
+      'MISSING_ROLE',
+      'MISSING_SCOPE',
+    ]);
+  });
+
+  it('evaluateClaims ignores tenant and ownership, which need the resource', () => {
+    const result = createEvaluator().evaluateClaims(
+      PolicyComposer.from({ resource: 'invoice', tenant: true, ownership: true }),
+      context({
+        principal: fakePrincipal({ id: 'other', tenantId: 'tenant-b' }),
+      }),
+    );
+
+    expect(result).toEqual({ allowed: true, reason: 'allowed', violations: [] });
+  });
+
+  it('evaluateClaims denies an unauthenticated principal without touching the resource', () => {
+    const result = createEvaluator().evaluateClaims(
+      PolicyComposer.from({ resource: 'invoice', tenant: true }),
+      context({ principal: null }),
+    );
+
+    expect(result.reason).toBe('unauthenticated');
+  });
+
+  it('evaluateResource checks tenant, ownership, and handlers', async () => {
+    const result = await createEvaluator().evaluateResource(
+      PolicyComposer.from({ resource: 'invoice', tenant: true, ownership: true }),
+      context({
+        principal: fakePrincipal({ id: 'other', tenantId: 'tenant-b' }),
+      }),
+    );
+
+    expect(result.violations.map((violation) => violation.type)).toEqual([
+      'TENANT_MISMATCH',
+      'OWNERSHIP_MISMATCH',
+    ]);
+  });
+
+  it('evaluateResource ignores roles and scopes, already settled by the claims phase', async () => {
+    const result = await createEvaluator().evaluateResource(
+      PolicyComposer.from({ roles: ['admin'], scopes: ['invoice:export'] }),
+      context(),
+    );
+
+    expect(result).toEqual({ allowed: true, reason: 'allowed', violations: [] });
+  });
+
+  it('evaluateResource fails closed when called without a principal', async () => {
+    const result = await createEvaluator().evaluateResource(
+      PolicyComposer.from({ resource: 'invoice', ownership: true }),
+      context({ principal: null }),
+    );
+
+    expect(result.reason).toBe('unauthenticated');
+  });
+
+  it('evaluate keeps reporting both phases in one result', async () => {
+    const result = await createEvaluator().evaluate(
+      PolicyComposer.from({
+        resource: 'invoice',
+        roles: ['admin'],
+        scopes: ['invoice:export'],
+        tenant: true,
+        ownership: true,
+      }),
+      context({
+        principal: fakePrincipal({
+          id: 'other',
+          roles: ['user'],
+          scopes: ['invoice:read'],
+          tenantId: 'tenant-b',
+        }),
+      }),
+    );
+
+    expect(result.reason).toBe('missing_role');
+    expect(result.violations.map((violation) => violation.type)).toEqual([
+      'MISSING_ROLE',
+      'MISSING_SCOPE',
+      'TENANT_MISMATCH',
+      'OWNERSHIP_MISMATCH',
+    ]);
+  });
+});

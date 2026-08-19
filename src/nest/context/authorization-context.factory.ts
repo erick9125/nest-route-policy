@@ -19,6 +19,18 @@ export class AuthorizationContextFactory {
     executionContext: ExecutionContext,
     policy: ComposedRoutePolicy,
   ): Promise<AuthorizationContext> {
+    const base = await this.createBase(executionContext, policy);
+    return this.withResource(policy, base);
+  }
+
+  /**
+   * Everything that does not need the resource: principal, params, query. No
+   * I/O, so a caller can reject a request before paying for a resource lookup.
+   */
+  async createBase(
+    executionContext: ExecutionContext,
+    policy: ComposedRoutePolicy,
+  ): Promise<AuthorizationContext> {
     // Outside HTTP, `switchToHttp().getRequest()` hands back the transport
     // payload, so a caller-supplied message could pass itself off as the
     // request and its `user` as an authenticated principal. Fail closed.
@@ -29,18 +41,26 @@ export class AuthorizationContextFactory {
 
     const request = executionContext.switchToHttp().getRequest<Record<PropertyKey, unknown>>();
     const principal = await this.principalResolver.resolve(executionContext);
-    const params = readStringRecord(request['params']);
-    const query = readQuery(request['query']);
 
-    const context: AuthorizationContext = {
+    return {
       principal,
-      params,
-      query,
+      params: readStringRecord(request['params']),
+      query: readQuery(request['query']),
       request,
       ...(policy.action !== undefined ? { action: policy.action } : {}),
       ...(policy.resource !== undefined ? { resourceType: policy.resource } : {}),
     };
+  }
 
+  /**
+   * Resolves the resource named by the policy and publishes it on the request
+   * for `@AuthorizedResource()`. Returns the context untouched when the policy
+   * names no resource.
+   */
+  async withResource(
+    policy: ComposedRoutePolicy,
+    context: AuthorizationContext,
+  ): Promise<AuthorizationContext> {
     if (policy.resource === undefined) {
       if (policy.tenant || policy.ownership) {
         throw new PolicyEvaluationException(
@@ -52,6 +72,7 @@ export class AuthorizationContextFactory {
 
     const registration = this.resources.require(policy.resource);
     const resource = await registration.resolver.resolve(context);
+    const request = context.request as Record<PropertyKey, unknown>;
     request[ROUTE_POLICY_RESOURCE] = resource;
 
     if (resource === null) {
