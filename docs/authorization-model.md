@@ -8,9 +8,14 @@ A route with a policy is allowed only when **all** of the following hold:
 2. An authenticated principal exists (`id` is a non-empty string).
 3. Every role group passes (`any` or `all` according to `roleMode`).
 4. Required scopes pass (`all` by default).
-5. Tenant matches when `tenant: true`.
-6. Ownership matches when `ownership: true`.
-7. Every named custom handler allows.
+5. The resource resolves to a value, when the policy names one.
+6. Tenant matches when `tenant: true`.
+7. Ownership matches when `ownership: true`.
+8. Every named custom handler allows.
+
+Steps 1 to 4 need nothing but the principal and run in memory. The resource is
+resolved only after they pass, so a denied caller never triggers a lookup. Steps
+5 to 8 are the resource phase.
 
 ## Naming a resource is not a check
 

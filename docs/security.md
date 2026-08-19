@@ -29,6 +29,13 @@ Internal reason codes and tenant / owner identifiers must not appear in that
 body. Missing resources also return 403 rather than 404 so callers cannot
 enumerate ids from the status code.
 
+## Enumeration resistance
+
+Nothing is read from storage until the caller has proved they are authenticated
+and hold the route's roles and scopes. A caller who fails any of those gets the
+same generic 403 whether the id exists or not, and the resolver is never called,
+so response timing does not separate the two either.
+
 ## Fail closed
 
 Unknown handlers, unknown resource types, and thrown resolvers do not allow
