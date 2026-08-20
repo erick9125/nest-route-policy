@@ -46,12 +46,12 @@ autenticación tiene que ocurrir **antes** de que corra `RoutePolicyGuard`.
 ## Instalación
 
 ```bash
-npm install @erickmorales/nest-route-policy
+npm install @erickmorales91/nest-route-policy
 ```
 
 Requiere `@nestjs/common` y `@nestjs/core` (>= 10) en el proyecto. El núcleo
 vive en la raíz del paquete y no carga NestJS; el guard, el módulo y los
-decoradores se importan desde `@erickmorales/nest-route-policy/nest`.
+decoradores se importan desde `@erickmorales91/nest-route-policy/nest`.
 
 ## Uso mínimo
 

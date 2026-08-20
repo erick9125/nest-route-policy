@@ -17,8 +17,8 @@ asks the evaluator for a decision.
 
 Public entry points:
 
-- `@erickmorales/nest-route-policy` — core types, evaluator, testing helpers
-- `@erickmorales/nest-route-policy/nest` — `RoutePolicyModule`, guard, decorators
+- `@erickmorales91/nest-route-policy` — core types, evaluator, testing helpers
+- `@erickmorales91/nest-route-policy/nest` — `RoutePolicyModule`, guard, decorators
 
 The HTTP pipeline expected by `0.1.0`:
 

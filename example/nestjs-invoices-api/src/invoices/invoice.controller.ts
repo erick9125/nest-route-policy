@@ -1,5 +1,5 @@
 import { Body, Controller, Delete, Get, Inject, Param, Patch, Post } from '@nestjs/common';
-import { Authorize, AuthorizedResource } from '@erickmorales/nest-route-policy/nest';
+import { Authorize, AuthorizedResource } from '@erickmorales91/nest-route-policy/nest';
 import type { Invoice } from './invoice.js';
 import { InvoiceStore } from './invoice.store.js';
 

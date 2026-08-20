@@ -3,7 +3,7 @@ import type {
   AuthorizationContext,
   AuthorizationDecision,
   PolicyHandler,
-} from '@erickmorales/nest-route-policy';
+} from '@erickmorales91/nest-route-policy';
 import type { Invoice } from './invoice.js';
 
 @Injectable()

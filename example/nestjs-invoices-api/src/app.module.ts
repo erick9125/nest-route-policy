@@ -1,6 +1,6 @@
 import { Global, Module } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
-import { RoutePolicyModule, RoutePolicyGuard } from '@erickmorales/nest-route-policy/nest';
+import { RoutePolicyModule, RoutePolicyGuard } from '@erickmorales91/nest-route-policy/nest';
 import { DemoAuthGuard } from './auth/demo-auth.guard.js';
 import { InvoiceApprovalPolicy } from './invoices/invoice-approval.policy.js';
 import { InvoiceAttributesResolver } from './invoices/invoice.attributes-resolver.js';

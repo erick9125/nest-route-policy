@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import type {
   ResourceAttributes,
   ResourceAttributesResolver,
-} from '@erickmorales/nest-route-policy';
+} from '@erickmorales91/nest-route-policy';
 import type { Invoice } from './invoice.js';
 
 @Injectable()
