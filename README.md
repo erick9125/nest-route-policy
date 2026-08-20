@@ -12,7 +12,7 @@ ownership, tenant, roles, scopes, and custom policy handlers.
 
 |         |                                      |
 | ------- | ------------------------------------ |
-| Package | `@erickmorales/nest-route-policy`    |
+| Package | `@erickmorales91/nest-route-policy`  |
 | Runtime | NestJS HTTP applications, TypeScript |
 | License | MIT                                  |
 
@@ -156,7 +156,7 @@ Authorization failures are denied by default.
 ## Installation
 
 ```bash
-npm install @erickmorales/nest-route-policy
+npm install @erickmorales91/nest-route-policy
 ```
 
 Peer dependencies, already present in a NestJS app:
@@ -166,7 +166,7 @@ Peer dependencies, already present in a NestJS app:
 - `rxjs`
 
 The core evaluator lives on the package root and does not load NestJS. Guards,
-decorators, and the module are imported from `@erickmorales/nest-route-policy/nest`.
+decorators, and the module are imported from `@erickmorales91/nest-route-policy/nest`.
 
 `0.1.0` is tested with NestJS 10 and 11 on Node 20 and 22, HTTP / Express.
 
@@ -190,7 +190,7 @@ Register the module and a global guard:
 
 ```ts
 import { APP_GUARD } from '@nestjs/core';
-import { RoutePolicyModule, RoutePolicyGuard } from '@erickmorales/nest-route-policy/nest';
+import { RoutePolicyModule, RoutePolicyGuard } from '@erickmorales91/nest-route-policy/nest';
 
 @Module({
   imports: [
@@ -615,7 +615,7 @@ The suffix tells you which of the two you are looking at:
 The core evaluator does not need NestJS:
 
 ```ts
-import { evaluatePolicy } from '@erickmorales/nest-route-policy';
+import { evaluatePolicy } from '@erickmorales91/nest-route-policy';
 
 const result = await evaluatePolicy({
   policy: { scopes: ['invoice:read'] },

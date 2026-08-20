@@ -1,6 +1,6 @@
 # NestJS invoices example
 
-A small HTTP API that shows how `@erickmorales/nest-route-policy` enforces
+A small HTTP API that shows how `@erickmorales91/nest-route-policy` enforces
 object-level authorization on invoices.
 
 This is a demonstration, not a production billing system. Authentication is a

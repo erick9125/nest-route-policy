@@ -2,14 +2,14 @@
   "name": "nestjs-invoices-api",
   "private": true,
   "version": "0.1.0",
-  "description": "Example NestJS API that uses @erickmorales/nest-route-policy for invoice authorization.",
+  "description": "Example NestJS API that uses @erickmorales91/nest-route-policy for invoice authorization.",
   "type": "module",
   "scripts": {
     "start": "tsx src/main.ts",
     "start:dev": "tsx watch src/main.ts"
   },
   "dependencies": {
-    "@erickmorales/nest-route-policy": "file:../..",
+    "@erickmorales91/nest-route-policy": "file:../..",
     "@nestjs/common": "^11.1.5",
     "@nestjs/core": "^11.1.5",
     "@nestjs/platform-express": "^11.1.5",

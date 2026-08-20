@@ -1,5 +1,5 @@
 {
-  "name": "@erickmorales/nest-route-policy",
+  "name": "@erickmorales91/nest-route-policy",
   "version": "0.1.0",
   "description": "Declarative resource-level authorization for NestJS with ownership, roles, scopes, tenant context, and extensible policy evaluation.",
   "type": "module",

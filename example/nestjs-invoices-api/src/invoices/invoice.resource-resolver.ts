@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import type { AuthorizationContext, ResourceResolver } from '@erickmorales/nest-route-policy';
+import type { AuthorizationContext, ResourceResolver } from '@erickmorales91/nest-route-policy';
 import { InvoiceStore } from './invoice.store.js';
 import type { Invoice } from './invoice.js';
 
