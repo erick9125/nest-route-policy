@@ -1,5 +1,4 @@
 import { Global, Module, type DynamicModule, type Provider, type Type } from '@nestjs/common';
-import { Reflector } from '@nestjs/core';
 import type { PolicyHandler } from '../core/contracts/policy-handler.js';
 import type { ResourceAttributesResolver } from '../core/contracts/resource-attributes-resolver.js';
 import type { ResourceResolver } from '../core/contracts/resource-resolver.js';
@@ -7,17 +6,10 @@ import { PolicyEvaluator } from '../core/evaluation/policy-evaluator.js';
 import { PolicyHandlerRegistry } from '../registry/policy-handler-registry.js';
 import { ResourceRegistry } from '../registry/resource-registry.js';
 import { AuthorizationContextFactory } from './context/authorization-context.factory.js';
-import {
-  PRINCIPAL_RESOLVER,
-  ROUTE_POLICY_LOGGER,
-  ROUTE_POLICY_OPTIONS,
-} from './constants.js';
+import { PRINCIPAL_RESOLVER, ROUTE_POLICY_LOGGER, ROUTE_POLICY_OPTIONS } from './constants.js';
 import { RoutePolicyGuard } from './guards/route-policy.guard.js';
 import { DefaultPrincipalResolver } from './resolvers/default-principal.resolver.js';
-import type {
-  ResourceDefinition,
-  RoutePolicyModuleOptions,
-} from './route-policy.options.js';
+import type { ResourceDefinition, RoutePolicyModuleOptions } from './route-policy.options.js';
 
 @Global()
 @Module({})
@@ -32,7 +24,6 @@ export class RoutePolicyModule {
       module: RoutePolicyModule,
       imports: [...(options.imports ?? [])],
       providers: [
-        Reflector,
         { provide: ROUTE_POLICY_OPTIONS, useValue: options },
         ...(options.logger ? [{ provide: ROUTE_POLICY_LOGGER, useValue: options.logger }] : []),
         principalResolver,

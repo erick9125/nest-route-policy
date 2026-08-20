@@ -26,15 +26,20 @@ import { Authorize } from '../../src/nest/decorators/authorize.decorator.js';
 import { AuthorizedResource } from '../../src/nest/decorators/authorized-resource.decorator.js';
 import { RoutePolicyModule } from '../../src/nest/route-policy.module.js';
 import { RoutePolicyGuard } from '../../src/nest/guards/route-policy.guard.js';
-import {
-  type Invoice,
-  createInvoiceStore,
-} from './invoices.js';
+import { type Invoice, createInvoiceStore } from './invoices.js';
 import { principalById } from './principals.js';
 
 @Injectable()
 export class InvoiceStore {
-  private readonly invoices = createInvoiceStore();
+  private invoices = createInvoiceStore();
+
+  /**
+   * Restores the seed data. Tests mutate invoices (approve, patch, delete), so
+   * each one starts from the same state without paying to rebuild the app.
+   */
+  reset(): void {
+    this.invoices = createInvoiceStore();
+  }
 
   findById(id: string | undefined): Invoice | null {
     if (!id) {

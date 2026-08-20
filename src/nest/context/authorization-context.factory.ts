@@ -41,11 +41,14 @@ export class AuthorizationContextFactory {
     const request = executionContext.switchToHttp().getRequest<Record<PropertyKey, unknown>>();
     const principal = await this.principalResolver.resolve(executionContext);
 
+    const body = readRecord(request['body']);
+
     return {
       principal,
       params: readStringRecord(request['params']),
-      query: readQuery(request['query']),
+      query: readRecord(request['query']) ?? {},
       request,
+      ...(body !== undefined ? { body } : {}),
       ...(policy.action !== undefined ? { action: policy.action } : {}),
       ...(policy.resource !== undefined ? { resourceType: policy.resource } : {}),
     };
@@ -66,8 +69,7 @@ export class AuthorizationContextFactory {
 
     const registration = this.resources.require(policy.resource);
     const resource = await registration.resolver.resolve(context);
-    const request = context.request as Record<PropertyKey, unknown>;
-    request[ROUTE_POLICY_RESOURCE] = resource;
+    publishResource(context.request, resource);
 
     if (resource === null) {
       return {
@@ -84,6 +86,15 @@ export class AuthorizationContextFactory {
   }
 }
 
+/**
+ * The request is the only channel `@AuthorizedResource()` can read from, so the
+ * resolved resource is stashed on it under a Symbol. Deliberate mutation, kept
+ * in one named place rather than inline in the resolution flow.
+ */
+function publishResource(request: unknown, resource: unknown): void {
+  (request as Record<PropertyKey, unknown>)[ROUTE_POLICY_RESOURCE] = resource;
+}
+
 function readStringRecord(value: unknown): Readonly<Record<string, string>> {
   if (value === null || value === undefined || typeof value !== 'object') {
     return {};
@@ -98,9 +109,10 @@ function readStringRecord(value: unknown): Readonly<Record<string, string>> {
   return result;
 }
 
-function readQuery(value: unknown): Readonly<Record<string, unknown>> {
+/** Copies a plain object off the request, or `undefined` when there is none. */
+function readRecord(value: unknown): Readonly<Record<string, unknown>> | undefined {
   if (value === null || value === undefined || typeof value !== 'object') {
-    return {};
+    return undefined;
   }
 
   return { ...(value as Record<string, unknown>) };

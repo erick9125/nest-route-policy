@@ -22,6 +22,8 @@ export default defineConfig({
         'src/core/evaluation/requirement-evaluation.ts',
       ],
       thresholds: {
+        // perFile so a well-covered module cannot mask a barely-tested one.
+        perFile: true,
         statements: 90,
         branches: 85,
         functions: 90,

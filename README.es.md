@@ -23,7 +23,7 @@ findOne(@Param('id') id: string) {
 
 No responde a la que importa:
 
-> ¿Puede *este* usuario leer *esta* factura?
+> ¿Puede _este_ usuario leer _esta_ factura?
 
 `GET /invoices/100` funciona para cualquiera que tenga `invoice:read`, incluso
 si la factura 100 pertenece a otro tenant o a otro dueño. Es la clase de fallo

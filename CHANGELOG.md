@@ -29,21 +29,14 @@
 - `PolicyEvaluator` accepts an optional `PolicyEvaluatorCollaborators` argument,
   so a requirement's semantics (hierarchical roles, for instance) can be
   replaced without expressing it as a `PolicyHandler`.
+- `AuthorizationContext.body`, so a resolver or handler that needs the payload
+  no longer has to cast `context.request`. Optional, and `evaluatePolicy()`
+  accepts a matching `body` input.
 - `RequirementEvaluation` is exported. It is the return type of four exported
   evaluators and consumers previously could not name it.
 
 ### Changed
 
-- **Breaking:** a policy requiring `tenant` or `ownership` without a `resource`
-  now throws `MissingResourceTypeError` at composition time. The check used to
-  live in two places and fire per request.
-- **Breaking:** `ResourceRegistry.register` rejects a duplicate resource type
-  instead of silently replacing the resolver, matching `PolicyHandlerRegistry`.
-- Custom policy handlers stop at the first denial rather than running the rest
-  once the decision is settled, and a handler's `reason` now reaches the
-  violation message. That message stays internal — it is not in the 403 body.
-- `@nestjs/common` and `@nestjs/core` are no longer optional peers, so a missing
-  install warns instead of failing at runtime on the first `/nest` import.
 - **Breaking:** `@AuthorizedResource()` now throws
   `AuthorizedResourceUnavailableError` when no resource was loaded for the
   route, instead of injecting `undefined` and letting the handler run as if it
@@ -51,12 +44,45 @@
 - **Breaking:** applying more than one `@Authorize()` to the same method or
   controller now throws `DuplicateRoutePolicyError` at module load. Metadata is
   overwritten, so one of the policies was previously discarded in silence.
+- **Breaking:** a policy requiring `tenant` or `ownership` without a `resource`
+  now throws `MissingResourceTypeError` at composition time. The check used to
+  live in two places and fire per request.
+- **Breaking:** `ResourceRegistry.register` rejects a duplicate resource type
+  instead of silently replacing the resolver, matching `PolicyHandlerRegistry`.
 - **Breaking:** `PolicyEvaluator` gained `evaluateClaims()` and
   `evaluateResource()`, and `AuthorizationContextFactory` gained `createBase()`
   and `withResource()`. `evaluate()` and `create()` keep their behaviour.
 - **Breaking:** `RoutePolicy` accepts `unsafeSkipObjectCheck`, and
   `ComposedRoutePolicy` now carries it. Policies that relied on `resource`
   without an object-level check must add a check or the flag.
+- Custom policy handlers stop at the first denial rather than running the rest
+  once the decision is settled, and a handler's `reason` now reaches the
+  violation message. That message stays internal — it is not in the 403 body.
+- `@nestjs/common` and `@nestjs/core` are no longer optional peers, so a missing
+  install warns instead of failing at runtime on the first `/nest` import.
+- `ROUTE_POLICY_METADATA` is a `Symbol`, like the other four module constants.
+  Code using the exported constant is unaffected.
+- `DefaultPrincipalResolver` reads each optional field once instead of running
+  every type guard twice, and `isOptionalString` is now `isString` — it never
+  accepted `undefined`.
+- `Reflector` is no longer re-provided by `RoutePolicyModule`; `@nestjs/core`
+  already provides it globally.
+- Coverage thresholds are enforced per file, so a well-covered module cannot
+  mask a barely-tested one. Formatting is enforced by `npm run format:check`,
+  wired into `check` and CI, and `.gitattributes` pins source line endings to
+  LF so a Windows checkout does not diverge from it.
+- Tests reset the invoice fixture between cases instead of sharing mutated state
+  through `beforeAll`, which made them depend on execution order.
+
+### Fixed
+
+- `finalize-build.mjs` creates `dist/esm` before writing its `package.json`,
+  instead of relying on the ESM build having run first.
+- The documented 403 body now matches what NestJS actually returns: it includes
+  `error: "Forbidden"` alongside `statusCode` and `message`.
+- The Quick start shows the authentication guard registered before
+  `RoutePolicyGuard`. Registered the other way round, every protected route
+  denies.
 
 ## 0.1.0
 

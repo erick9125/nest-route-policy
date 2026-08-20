@@ -1,12 +1,5 @@
 import type { AuthorizationPrincipal } from '../../src/core/models/authorization-principal.js';
-import {
-  ADMIN_A,
-  MANAGER_A,
-  TENANT_A,
-  TENANT_B,
-  USER_A,
-  USER_B,
-} from './invoices.js';
+import { ADMIN_A, MANAGER_A, TENANT_A, TENANT_B, USER_A, USER_B } from './invoices.js';
 
 export const principals = {
   userA: {

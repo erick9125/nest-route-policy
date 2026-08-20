@@ -1,7 +1,7 @@
-import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import type { INestApplication } from '@nestjs/common';
 import request from 'supertest';
-import { createInvoicesApp } from '../fixtures/invoices-app.js';
+import { InvoiceStore, createInvoicesApp } from '../fixtures/invoices-app.js';
 import { INVOICE_A1, USER_A } from '../fixtures/invoices.js';
 
 describe('NestJS RoutePolicyGuard', () => {
@@ -9,6 +9,10 @@ describe('NestJS RoutePolicyGuard', () => {
 
   beforeAll(async () => {
     app = await createInvoicesApp();
+  });
+
+  beforeEach(() => {
+    app.get(InvoiceStore).reset();
   });
 
   afterAll(async () => {

@@ -72,3 +72,14 @@ describe('@Authorize', () => {
     }).not.toThrow();
   });
 });
+
+describe('@Authorize duplicate reporting', () => {
+  it('names an anonymous class rather than reporting undefined', () => {
+    expect(() => {
+      const Anonymous = Authorize({ roles: ['admin'] })(
+        Authorize({ scopes: ['a'] })(class {}) as never,
+      );
+      return Anonymous;
+    }).toThrow(/anonymous class/);
+  });
+});

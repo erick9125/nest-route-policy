@@ -21,7 +21,8 @@ Denied requests return:
 ```json
 {
   "statusCode": 403,
-  "message": "Forbidden"
+  "message": "Forbidden",
+  "error": "Forbidden"
 }
 ```
 

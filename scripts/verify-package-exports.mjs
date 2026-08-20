@@ -72,10 +72,7 @@ try {
   fs.writeFileSync(path.join(cjsDir, 'package.json'), '{"name":"consumer-cjs"}');
   fs.writeFileSync(path.join(cjsDir, 'index.js'), CJS_ENTRY);
   fs.writeFileSync(path.join(cjsDir, 'isolation.js'), CJS_ISOLATION);
-  fs.writeFileSync(
-    path.join(esmDir, 'package.json'),
-    '{"name":"consumer-esm","type":"module"}',
-  );
+  fs.writeFileSync(path.join(esmDir, 'package.json'), '{"name":"consumer-esm","type":"module"}');
   fs.writeFileSync(path.join(esmDir, 'index.mjs'), ESM_ENTRY);
 
   run('CommonJS:', cjsDir, 'index.js');

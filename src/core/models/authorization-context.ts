@@ -9,5 +9,6 @@ export interface AuthorizationContext {
   readonly resourceType?: string;
   readonly params: Readonly<Record<string, string>>;
   readonly query: Readonly<Record<string, unknown>>;
+  readonly body?: Readonly<Record<string, unknown>>;
   readonly request: unknown;
 }

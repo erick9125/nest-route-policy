@@ -39,8 +39,7 @@ export class PolicyEvaluator {
     this.scopeEvaluator = collaborators.scopes ?? new ScopeEvaluator();
     this.tenantEvaluator = collaborators.tenant ?? new TenantEvaluator();
     this.ownershipEvaluator = collaborators.ownership ?? new OwnershipEvaluator();
-    this.customPolicyEvaluator =
-      collaborators.custom ?? new CustomPolicyEvaluator(handlerRegistry);
+    this.customPolicyEvaluator = collaborators.custom ?? new CustomPolicyEvaluator(handlerRegistry);
   }
 
   async evaluate(
