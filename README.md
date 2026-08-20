@@ -16,7 +16,7 @@ ownership, tenant, roles, scopes, and custom policy handlers.
 | Runtime | NestJS HTTP applications, TypeScript |
 | License | MIT |
 
-Also available in [Spanish](README.es.md).
+A Spanish-language summary is available in [README.es.md](README.es.md); this file is the full reference.
 
 ---
 
@@ -234,6 +234,41 @@ findOne(@AuthorizedResource() invoice: Invoice) {
 
 Routes without `@Authorize()` are left untouched. Routes with a policy are
 denied unless every requirement passes.
+
+### Custom principal resolver
+
+By default the guard reads `request.user` and accepts it only if it already
+matches `AuthorizationPrincipal`. Anything else — a different shape, a JWT
+payload with other field names — resolves to `null`, which is a deny.
+
+Map your own shape with `principalResolver`:
+
+```ts
+@Injectable()
+export class JwtPrincipalResolver implements PrincipalResolver {
+  resolve(context: ExecutionContext): AuthorizationPrincipal | null {
+    const { user } = context.switchToHttp().getRequest();
+    if (!user) {
+      return null;
+    }
+
+    return {
+      id: user.sub,
+      roles: user.realm_access?.roles ?? [],
+      scopes: user.scope?.split(' ') ?? [],
+      tenantId: user.org_id,
+    };
+  }
+}
+
+RoutePolicyModule.forRoot({
+  principalResolver: JwtPrincipalResolver,
+});
+```
+
+The resolver is a normal provider, so `imports` applies if it has dependencies.
+Returning `null` denies rather than throwing: a malformed principal is not an
+authenticated one.
 
 ---
 
@@ -507,6 +542,37 @@ keeps that check.
 A user who is authenticated, has `invoice:read`, and can hit `GET /invoices/:id`
 still gets **DENY** when invoice `123` belongs to another tenant. That is the
 behavior this package exists to make routine.
+
+### Logging and audit
+
+Pass a `logger` to receive every decision. `warn` fires on denials with a flat
+message; `decision` is optional and receives a structured event suitable for an
+audit trail:
+
+```ts
+RoutePolicyModule.forRoot({
+  logger: {
+    warn: (message) => appLogger.warn(message),
+    decision: (event) => auditStore.record(event),
+  },
+});
+```
+
+```ts
+interface AuthorizationDecisionEvent {
+  allowed: boolean;
+  reason: AuthorizationReason;
+  principalId?: string;
+  resource?: string;
+  action?: string;
+  violations: readonly AuthorizationViolationType[];
+}
+```
+
+The event carries violation **types**, never their messages — a message can
+quote a handler's own reason, which is domain data. The request, its body, and
+the resolved resource are deliberately absent, and no field identifies the
+resource instance.
 
 ---
 

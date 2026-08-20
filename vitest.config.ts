@@ -19,6 +19,7 @@ export default defineConfig({
         'src/core/contracts/**',
         'src/nest/route-policy.options.ts',
         'src/nest/resolvers/principal-resolver.ts',
+        'src/core/evaluation/requirement-evaluation.ts',
       ],
       thresholds: {
         statements: 90,

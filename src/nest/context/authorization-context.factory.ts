@@ -2,7 +2,6 @@ import { Inject, Injectable } from '@nestjs/common';
 import type { ExecutionContext } from '@nestjs/common';
 import type { AuthorizationContext } from '../../core/models/authorization-context.js';
 import type { ComposedRoutePolicy } from '../../core/composition/policy-composer.js';
-import { PolicyEvaluationException } from '../../errors/policy-evaluation.error.js';
 import { UnsupportedExecutionContextError } from '../../errors/unsupported-execution-context.error.js';
 import { ResourceRegistry } from '../../registry/resource-registry.js';
 import { PRINCIPAL_RESOLVER, ROUTE_POLICY_RESOURCE } from '../constants.js';
@@ -62,11 +61,6 @@ export class AuthorizationContextFactory {
     context: AuthorizationContext,
   ): Promise<AuthorizationContext> {
     if (policy.resource === undefined) {
-      if (policy.tenant || policy.ownership) {
-        throw new PolicyEvaluationException(
-          'Tenant and ownership checks require a resource type on the policy.',
-        );
-      }
       return context;
     }
 

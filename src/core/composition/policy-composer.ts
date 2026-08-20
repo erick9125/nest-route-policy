@@ -1,4 +1,5 @@
 import { MissingObjectCheckError } from '../../errors/missing-object-check.error.js';
+import { MissingResourceTypeError } from '../../errors/missing-resource-type.error.js';
 import type { RoleMode, RoutePolicy, ScopeMode } from '../models/route-policy.js';
 
 export interface PolicyDefaults {
@@ -21,11 +22,7 @@ export interface ComposedRoutePolicy {
 
 export class PolicyComposer {
   static from(policy: RoutePolicy, defaults: PolicyDefaults = {}): ComposedRoutePolicy {
-    const composed = PolicyComposer.compose(undefined, policy, defaults);
-    if (!composed) {
-      throw new Error('RoutePolicy composition produced no policy.');
-    }
-    return composed;
+    return PolicyComposer.build(undefined, policy, defaults);
   }
 
   static compose(
@@ -37,6 +34,14 @@ export class PolicyComposer {
       return null;
     }
 
+    return PolicyComposer.build(classPolicy, methodPolicy, defaults);
+  }
+
+  private static build(
+    classPolicy: RoutePolicy | undefined,
+    methodPolicy: RoutePolicy | undefined,
+    defaults: PolicyDefaults,
+  ): ComposedRoutePolicy {
     const resource = methodPolicy?.resource ?? classPolicy?.resource;
     const action = methodPolicy?.action ?? classPolicy?.action;
     const roleMode = methodPolicy?.roleMode ?? classPolicy?.roleMode ?? defaults.roleMode ?? 'any';
@@ -60,15 +65,22 @@ export class PolicyComposer {
       roleMode,
       scopeMode,
       unsafeSkipObjectCheck:
-        classPolicy?.unsafeSkipObjectCheck === true ||
-        methodPolicy?.unsafeSkipObjectCheck === true,
+        classPolicy?.unsafeSkipObjectCheck === true || methodPolicy?.unsafeSkipObjectCheck === true,
       ...(resource !== undefined ? { resource } : {}),
       ...(action !== undefined ? { action } : {}),
     };
 
+    PolicyComposer.assertResourceType(composed);
     PolicyComposer.assertObjectCheck(composed);
 
     return composed;
+  }
+
+  /** Tenant and ownership compare against resource attributes, so they need one. */
+  private static assertResourceType(policy: ComposedRoutePolicy): void {
+    if ((policy.tenant || policy.ownership) && policy.resource === undefined) {
+      throw new MissingResourceTypeError();
+    }
   }
 
   /**

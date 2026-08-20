@@ -20,8 +20,30 @@
   own `user` as an authenticated principal. Handlers without `@Authorize()` are
   unaffected on every transport.
 
+### Added
+
+- `RoutePolicyLogger.decision(event)` — an optional hook receiving a structured
+  `AuthorizationDecisionEvent` for every decision, allowed or denied, with the
+  principal id, policy, reason, and violation types. `warn(message)` is
+  unchanged. The event carries violation types only, never their messages.
+- `PolicyEvaluator` accepts an optional `PolicyEvaluatorCollaborators` argument,
+  so a requirement's semantics (hierarchical roles, for instance) can be
+  replaced without expressing it as a `PolicyHandler`.
+- `RequirementEvaluation` is exported. It is the return type of four exported
+  evaluators and consumers previously could not name it.
+
 ### Changed
 
+- **Breaking:** a policy requiring `tenant` or `ownership` without a `resource`
+  now throws `MissingResourceTypeError` at composition time. The check used to
+  live in two places and fire per request.
+- **Breaking:** `ResourceRegistry.register` rejects a duplicate resource type
+  instead of silently replacing the resolver, matching `PolicyHandlerRegistry`.
+- Custom policy handlers stop at the first denial rather than running the rest
+  once the decision is settled, and a handler's `reason` now reaches the
+  violation message. That message stays internal — it is not in the 403 body.
+- `@nestjs/common` and `@nestjs/core` are no longer optional peers, so a missing
+  install warns instead of failing at runtime on the first `/nest` import.
 - **Breaking:** `@AuthorizedResource()` now throws
   `AuthorizedResourceUnavailableError` when no resource was loaded for the
   route, instead of injecting `undefined` and letting the handler run as if it

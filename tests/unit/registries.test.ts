@@ -38,3 +38,18 @@ describe('error types', () => {
     expect(error).toBeInstanceOf(PolicyEvaluationException);
   });
 });
+
+describe('duplicate registrations', () => {
+  it('rejects a duplicate resource type instead of overwriting the resolver', () => {
+    const registry = new ResourceRegistry();
+    const first = { resolver: { resolve: async () => null }, attributes: { resolve: () => ({}) } };
+    const second = {
+      resolver: { resolve: async () => ({ id: 'other' }) },
+      attributes: { resolve: () => ({}) },
+    };
+
+    registry.register('invoice', first);
+    expect(() => registry.register('invoice', second)).toThrow(PolicyEvaluationException);
+    expect(registry.get('invoice')).toBe(first);
+  });
+});

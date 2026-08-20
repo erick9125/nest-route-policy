@@ -1,4 +1,3 @@
-import { PolicyEvaluationException } from '../../errors/policy-evaluation.error.js';
 import type { AuthorizationContext } from '../models/authorization-context.js';
 import type { AuthorizationPrincipal } from '../models/authorization-principal.js';
 import { type AuthorizationResult, reasonFromViolation } from '../models/authorization-result.js';
@@ -11,15 +10,37 @@ import { ScopeEvaluator } from './scope-evaluator.js';
 import { TenantEvaluator } from './tenant-evaluator.js';
 import type { PolicyHandlerRegistry } from '../../registry/policy-handler-registry.js';
 
+/**
+ * Requirement evaluators the policy evaluator delegates to. Every field is
+ * optional and defaults to the built-in implementation; override one to change
+ * a requirement's semantics (hierarchical roles, for instance) without having
+ * to express it as a PolicyHandler.
+ */
+export interface PolicyEvaluatorCollaborators {
+  readonly roles?: RoleEvaluator;
+  readonly scopes?: ScopeEvaluator;
+  readonly tenant?: TenantEvaluator;
+  readonly ownership?: OwnershipEvaluator;
+  readonly custom?: CustomPolicyEvaluator;
+}
+
 export class PolicyEvaluator {
-  private readonly roleEvaluator = new RoleEvaluator();
-  private readonly scopeEvaluator = new ScopeEvaluator();
-  private readonly tenantEvaluator = new TenantEvaluator();
-  private readonly ownershipEvaluator = new OwnershipEvaluator();
+  private readonly roleEvaluator: RoleEvaluator;
+  private readonly scopeEvaluator: ScopeEvaluator;
+  private readonly tenantEvaluator: TenantEvaluator;
+  private readonly ownershipEvaluator: OwnershipEvaluator;
   private readonly customPolicyEvaluator: CustomPolicyEvaluator;
 
-  constructor(handlerRegistry: PolicyHandlerRegistry) {
-    this.customPolicyEvaluator = new CustomPolicyEvaluator(handlerRegistry);
+  constructor(
+    handlerRegistry: PolicyHandlerRegistry,
+    collaborators: PolicyEvaluatorCollaborators = {},
+  ) {
+    this.roleEvaluator = collaborators.roles ?? new RoleEvaluator();
+    this.scopeEvaluator = collaborators.scopes ?? new ScopeEvaluator();
+    this.tenantEvaluator = collaborators.tenant ?? new TenantEvaluator();
+    this.ownershipEvaluator = collaborators.ownership ?? new OwnershipEvaluator();
+    this.customPolicyEvaluator =
+      collaborators.custom ?? new CustomPolicyEvaluator(handlerRegistry);
   }
 
   async evaluate(
@@ -73,14 +94,6 @@ export class PolicyEvaluator {
     }
 
     const principal = context.principal;
-
-    if (policy.tenant || policy.ownership) {
-      if (policy.resource === undefined) {
-        throw new PolicyEvaluationException(
-          'Tenant and ownership checks require a resource type on the policy.',
-        );
-      }
-    }
 
     if (
       policy.resource !== undefined &&

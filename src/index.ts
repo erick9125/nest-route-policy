@@ -26,6 +26,8 @@ export { ScopeEvaluator } from './core/evaluation/scope-evaluator.js';
 export { TenantEvaluator } from './core/evaluation/tenant-evaluator.js';
 export { OwnershipEvaluator } from './core/evaluation/ownership-evaluator.js';
 export { CustomPolicyEvaluator } from './core/evaluation/custom-policy-evaluator.js';
+export type { PolicyEvaluatorCollaborators } from './core/evaluation/policy-evaluator.js';
+export type { RequirementEvaluation } from './core/evaluation/requirement-evaluation.js';
 
 export { PolicyHandlerRegistry } from './registry/policy-handler-registry.js';
 export { ResourceRegistry } from './registry/resource-registry.js';
@@ -35,6 +37,7 @@ export { PolicyEvaluationException } from './errors/policy-evaluation.error.js';
 export { ResourceResolverNotFoundError } from './errors/resource-resolver-not-found.error.js';
 export { PolicyHandlerNotFoundError } from './errors/policy-handler-not-found.error.js';
 export { MissingObjectCheckError } from './errors/missing-object-check.error.js';
+export { MissingResourceTypeError } from './errors/missing-resource-type.error.js';
 export { UnsupportedExecutionContextError } from './errors/unsupported-execution-context.error.js';
 export { AuthorizedResourceUnavailableError } from './errors/authorized-resource-unavailable.error.js';
 export { DuplicateRoutePolicyError } from './errors/duplicate-route-policy.error.js';
