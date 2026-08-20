@@ -24,3 +24,43 @@ jobs:
       - run: npm run test:coverage
       - run: npm run build
       - run: npm run verify:package
+
+  # The peer range claims NestJS >= 10, so both majors get exercised.
+  nest-compat:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        nest-version: [10, 11]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Install the NestJS ${{ matrix.nest-version }} set
+        run: |
+          npm install --no-save \
+            @nestjs/common@${{ matrix.nest-version }} \
+            @nestjs/core@${{ matrix.nest-version }} \
+            @nestjs/platform-express@${{ matrix.nest-version }} \
+            @nestjs/testing@${{ matrix.nest-version }}
+      - run: npm test
+
+  # The example is the onboarding material, so it must keep compiling.
+  example:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - name: Typecheck the example against the built package
+        working-directory: example/nestjs-invoices-api
+        run: |
+          npm install
+          npx tsc --noEmit

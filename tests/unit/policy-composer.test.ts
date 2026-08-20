@@ -39,7 +39,10 @@ describe('PolicyComposer', () => {
   });
 
   it('enables tenant or ownership when either layer requests it', () => {
-    const composed = PolicyComposer.compose({ tenant: true }, { ownership: true });
+    const composed = PolicyComposer.compose(
+      { resource: 'invoice', tenant: true },
+      { ownership: true },
+    );
     expect(composed?.tenant).toBe(true);
     expect(composed?.ownership).toBe(true);
   });

@@ -1,11 +1,6 @@
 import type { AuthorizationPrincipal } from '../models/authorization-principal.js';
-import type { AuthorizationViolation } from '../models/authorization-violation.js';
 import type { RoleMode } from '../models/route-policy.js';
-
-export interface RequirementEvaluation {
-  readonly allowed: boolean;
-  readonly violation?: AuthorizationViolation;
-}
+import type { RequirementEvaluation } from './requirement-evaluation.js';
 
 export class RoleEvaluator {
   evaluate(

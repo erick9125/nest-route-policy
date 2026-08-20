@@ -49,3 +49,56 @@ describe('CustomPolicyEvaluator', () => {
     );
   });
 });
+
+describe('CustomPolicyEvaluator short-circuit', () => {
+  it('does not run the remaining handlers once one denies', async () => {
+    const calls: string[] = [];
+    const registry = new PolicyHandlerRegistry();
+    registry.register({
+      name: 'first',
+      evaluate: () => {
+        calls.push('first');
+        return { allowed: false };
+      },
+    });
+    registry.register({
+      name: 'second',
+      evaluate: () => {
+        calls.push('second');
+        return { allowed: true };
+      },
+    });
+
+    const violations = await new CustomPolicyEvaluator(registry).evaluate(
+      ['first', 'second'],
+      context({}),
+    );
+
+    expect(calls).toEqual(['first']);
+    expect(violations).toHaveLength(1);
+  });
+
+  it('carries the handler reason into the violation message', async () => {
+    const registry = new PolicyHandlerRegistry();
+    registry.register({
+      name: 'invoice.canApprove',
+      evaluate: () => ({ allowed: false, reason: 'invoice is not pending' }),
+    });
+
+    const violations = await new CustomPolicyEvaluator(registry).evaluate(
+      ['invoice.canApprove'],
+      context({}),
+    );
+
+    expect(violations[0]?.message).toContain('invoice is not pending');
+  });
+
+  it('reads well without a reason', async () => {
+    const registry = new PolicyHandlerRegistry();
+    registry.register({ name: 'plain', evaluate: () => ({ allowed: false }) });
+
+    const violations = await new CustomPolicyEvaluator(registry).evaluate(['plain'], context({}));
+
+    expect(violations[0]?.message).toBe('Custom policy handler "plain" denied the request.');
+  });
+});

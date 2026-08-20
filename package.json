@@ -50,7 +50,7 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "verify:package": "node scripts/verify-package-exports.mjs",
-    "check": "npm run lint && npm run typecheck && npm run test:unit && npm run build && npm run verify:package",
+    "check": "npm run lint && npm run typecheck && npm test && npm run build && npm run verify:package",
     "check:full": "npm run lint && npm run typecheck && npm run test:coverage && npm run build && npm run verify:package",
     "prepublishOnly": "npm run clean && npm run check:full"
   },
@@ -88,12 +88,6 @@
     "rxjs": ">=7"
   },
   "peerDependenciesMeta": {
-    "@nestjs/common": {
-      "optional": true
-    },
-    "@nestjs/core": {
-      "optional": true
-    },
     "reflect-metadata": {
       "optional": true
     },

@@ -1,6 +1,6 @@
 import type { AuthorizationPrincipal } from '../models/authorization-principal.js';
 import type { ScopeMode } from '../models/route-policy.js';
-import type { RequirementEvaluation } from './role-evaluator.js';
+import type { RequirementEvaluation } from './requirement-evaluation.js';
 
 export class ScopeEvaluator {
   evaluate(

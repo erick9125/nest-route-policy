@@ -16,5 +16,6 @@ export {
 export type {
   RoutePolicyModuleOptions,
   RoutePolicyLogger,
+  AuthorizationDecisionEvent,
   ResourceDefinition,
 } from './route-policy.options.js';

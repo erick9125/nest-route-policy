@@ -11,6 +11,7 @@ tmp/
 .idea/
 .vscode/
 example/**/node_modules/
+example/**/package-lock.json
 example/**/dist/
 example/**/.env
 *.tgz

@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { PolicyComposer } from '../../src/core/composition/policy-composer.js';
 import { PolicyEvaluator } from '../../src/core/evaluation/policy-evaluator.js';
+import type { RoleEvaluator } from '../../src/core/evaluation/role-evaluator.js';
+import { MissingResourceTypeError } from '../../src/errors/missing-resource-type.error.js';
 import { PolicyEvaluationException } from '../../src/errors/policy-evaluation.error.js';
 import { PolicyHandlerNotFoundError } from '../../src/errors/policy-handler-not-found.error.js';
 import { PolicyHandlerRegistry } from '../../src/registry/policy-handler-registry.js';
@@ -125,10 +127,9 @@ describe('PolicyEvaluator', () => {
     expect(denied.reason).toBe('custom_policy_denied');
   });
 
-  it('throws when tenant is required without a resource type', async () => {
-    await expect(
-      createEvaluator().evaluate(PolicyComposer.from({ tenant: true }), context()),
-    ).rejects.toBeInstanceOf(PolicyEvaluationException);
+  it('rejects tenant without a resource type at composition time', () => {
+    expect(() => PolicyComposer.from({ tenant: true })).toThrow(MissingResourceTypeError);
+    expect(() => PolicyComposer.from({ ownership: true })).toThrow(PolicyEvaluationException);
   });
 
   it('throws when a handler is unknown', async () => {
@@ -245,5 +246,31 @@ describe('PolicyEvaluator phases', () => {
       'TENANT_MISMATCH',
       'OWNERSHIP_MISMATCH',
     ]);
+  });
+});
+
+describe('PolicyEvaluator collaborators', () => {
+  it('uses an injected role evaluator instead of the built-in one', async () => {
+    const permissive = {
+      evaluate: (): { allowed: boolean } => ({ allowed: true }),
+    } as unknown as RoleEvaluator;
+
+    const evaluator = new PolicyEvaluator(new PolicyHandlerRegistry(), { roles: permissive });
+    const result = await evaluator.evaluate(
+      PolicyComposer.from({ roles: ['nobody-has-this'] }),
+      context(),
+    );
+
+    expect(result.allowed).toBe(true);
+  });
+
+  it('falls back to the built-in evaluator for anything not injected', async () => {
+    const evaluator = new PolicyEvaluator(new PolicyHandlerRegistry(), {});
+    const result = await evaluator.evaluate(
+      PolicyComposer.from({ roles: ['nobody-has-this'] }),
+      context(),
+    );
+
+    expect(result.reason).toBe('missing_role');
   });
 });

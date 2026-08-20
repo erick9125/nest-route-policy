@@ -2,27 +2,46 @@
 
 Autorización declarativa a nivel de recurso para NestJS.
 
-Nest Route Policy protege recursos de API con roles, scopes, ownership,
-límites de tenant y políticas contextuales, sin acoplar la autorización a los
-controladores ni al proveedor de autenticación.
-
-**Promesa de `0.1.0`:** declarar requisitos de autorización en rutas NestJS y
-evaluarlos contra el principal autenticado, el recurso, ownership, tenant,
-roles, scopes y handlers personalizados.
-
-También disponible en [inglés](README.md).
+> **Resumen en español.** La referencia completa —composición de policies,
+> handlers personalizados, modelo de seguridad, comportamiento de errores— está
+> en el [README en inglés](README.md), que es la documentación que se mantiene
+> al día. Esta página cubre lo justo para entender el paquete y arrancar.
 
 ## El problema
 
-Un `JwtAuthGuard` responde si el usuario está autenticado. No responde si ese
-usuario puede leer **esa** factura. `GET /invoices/100` con el scope
-`invoice:read` sigue siendo un fallo de autorización si la factura pertenece a
-otro tenant u otro dueño (BOLA / IDOR).
+Un handler de NestJS típico responde a una sola pregunta:
 
-## Qué no es
+```ts
+@Get(':id')
+@UseGuards(JwtAuthGuard)
+findOne(@Param('id') id: string) {
+  return this.service.findById(id);
+}
+```
 
-No es un IAM. No emite JWT, no inicia sesión y no guarda roles en base de
-datos. La autenticación ocurre antes; esta librería decide ALLOW / DENY.
+> ¿Está autenticado quien llama?
+
+No responde a la que importa:
+
+> ¿Puede *este* usuario leer *esta* factura?
+
+`GET /invoices/100` funciona para cualquiera que tenga `invoice:read`, incluso
+si la factura 100 pertenece a otro tenant o a otro dueño. Es la clase de fallo
+que OWASP llama BOLA / IDOR: el endpoint está autorizado, el objeto no.
+
+## Qué resuelve
+
+Evalúa, en una sola decisión: principal autenticado, acción, recurso,
+pertenencia (`ownership`), tenant, roles, scopes y policies personalizadas.
+
+- `@Authorize()` en controllers y métodos, que se combinan con AND
+- deny por defecto cuando hay una policy
+- `403` genérico, sin filtrar códigos internos ni ids de tenant o dueño
+- `@AuthorizedResource()` para que el guard y el controller compartan una carga
+- un evaluador sin dependencia de NestJS, testeable en aislamiento
+
+No es un IAM: no emite JWTs, no autentica, no reemplaza Passport. La
+autenticación tiene que ocurrir **antes** de que corra `RoutePolicyGuard`.
 
 ## Instalación
 
@@ -30,10 +49,47 @@ datos. La autenticación ocurre antes; esta librería decide ALLOW / DENY.
 npm install @erickmorales/nest-route-policy
 ```
 
-El evaluador vive en la raíz del paquete y no carga NestJS. Guards y
+Requiere `@nestjs/common` y `@nestjs/core` (>= 10) en el proyecto. El núcleo
+vive en la raíz del paquete y no carga NestJS; el guard, el módulo y los
 decoradores se importan desde `@erickmorales/nest-route-policy/nest`.
 
-## Uso rápido
+## Uso mínimo
+
+Deja tu usuario autenticado en `request.user` con esta forma:
+
+```ts
+interface AuthorizationPrincipal {
+  id: string;
+  roles?: readonly string[];
+  scopes?: readonly string[];
+  tenantId?: string;
+}
+```
+
+Registra el módulo y el guard global — **después** de tu guard de
+autenticación, que es el que rellena `request.user`:
+
+```ts
+@Module({
+  imports: [
+    RoutePolicyModule.forRoot({
+      resources: {
+        invoice: {
+          resolver: InvoiceResourceResolver,
+          attributes: InvoiceAttributesResolver,
+        },
+      },
+    }),
+  ],
+  providers: [
+    { provide: APP_GUARD, useClass: JwtAuthGuard },
+    { provide: APP_GUARD, useExisting: RoutePolicyGuard },
+  ],
+})
+export class AppModule {}
+```
+
+Declara qué exige cada ruta:
 
 ```ts
 @Get(':id')
@@ -47,14 +103,11 @@ findOne(@AuthorizedResource() invoice: Invoice) {
 }
 ```
 
-- Sin `@Authorize()` el guard no interviene.
-- Con política, se niega el acceso salvo que se cumplan todos los requisitos.
-- Roles: **any** por defecto. Scopes: **all** por defecto. Todo se combina con AND.
-- Un recurso inexistente es `403`, no `404`.
-- La respuesta HTTP es genérica (`Forbidden`). El motivo interno no se filtra.
-
-Un usuario autenticado, con `invoice:read` y acceso al endpoint, recibe **DENY**
-si la factura `123` es de otro tenant. Ese es el valor de la librería.
+Nombrar un `resource` obliga a comprobar algo sobre el objeto: `tenant`,
+`ownership` o un handler. Una policy que solo declara `resource` y `action` se
+rechaza, porque cargaría la fila sin verificar nada — justo el fallo que el
+paquete existe para evitar. `action` es metadata descriptiva y nunca deniega
+por sí sola.
 
 ## Licencia
 
