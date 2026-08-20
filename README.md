@@ -597,6 +597,14 @@ resource instance.
 Deny is a valid negative decision. An infrastructure failure is not rewritten
 into a deny, and it is never rewritten into an allow.
 
+The suffix tells you which of the two you are looking at:
+
+- **`*Error`** — an internal fault, surfacing as a `500`. All of them extend
+  `PolicyEvaluationError`, so one `catch` covers the family.
+- **`*Exception`** — a decision NestJS translates into an HTTP response.
+  `RoutePolicyDeniedException` extends Nest's `ForbiddenException` and follows
+  Nest's own naming for that role.
+
 ---
 
 ## Testing

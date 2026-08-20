@@ -37,6 +37,14 @@
 
 ### Changed
 
+- **Breaking:** `PolicyEvaluationException` is `PolicyEvaluationError`, along
+  with its `name`. Every internal fault now ends in `Error`, while
+  `RoutePolicyDeniedException` keeps its suffix: it extends Nest's
+  `ForbiddenException`, so it follows Nest's naming for a decision the framework
+  turns into an HTTP response. The suffix is now a boundary, not an accident.
+- **Breaking:** `src/testing/authorization-test-builder.ts` is
+  `src/testing/evaluate-policy.ts`. It contains no builder — it exports the
+  `evaluatePolicy` function. The published entry points are unchanged.
 - **Breaking:** `@AuthorizedResource()` now throws
   `AuthorizedResourceUnavailableError` when no resource was loaded for the
   route, instead of injecting `undefined` and letting the handler run as if it
@@ -76,6 +84,9 @@
 
 ### Fixed
 
+- `npm run build` cleans `dist/` first. `tsc` does not prune its output, so a
+  renamed or deleted source file used to leave a stale artifact behind, which
+  `files: ["dist"]` would have published.
 - `finalize-build.mjs` creates `dist/esm` before writing its `package.json`,
   instead of relying on the ESM build having run first.
 - The documented 403 body now matches what NestJS actually returns: it includes

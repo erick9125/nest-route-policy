@@ -1,6 +1,6 @@
 import type { ResourceAttributesResolver } from '../core/contracts/resource-attributes-resolver.js';
 import type { ResourceResolver } from '../core/contracts/resource-resolver.js';
-import { PolicyEvaluationException } from '../errors/policy-evaluation.error.js';
+import { PolicyEvaluationError } from '../errors/policy-evaluation.error.js';
 import { ResourceResolverNotFoundError } from '../errors/resource-resolver-not-found.error.js';
 
 export interface ResourceRegistration {
@@ -13,7 +13,7 @@ export class ResourceRegistry {
 
   register(resourceType: string, registration: ResourceRegistration): void {
     if (this.resources.has(resourceType)) {
-      throw new PolicyEvaluationException(`Duplicate resource type: "${resourceType}".`);
+      throw new PolicyEvaluationError(`Duplicate resource type: "${resourceType}".`);
     }
 
     this.resources.set(resourceType, registration);

@@ -1,6 +1,6 @@
-import { PolicyEvaluationException } from './policy-evaluation.error.js';
+import { PolicyEvaluationError } from './policy-evaluation.error.js';
 
-export class DuplicateRoutePolicyError extends PolicyEvaluationException {
+export class DuplicateRoutePolicyError extends PolicyEvaluationError {
   constructor(readonly target: string) {
     super(
       `More than one @Authorize() is applied to "${target}". ` +

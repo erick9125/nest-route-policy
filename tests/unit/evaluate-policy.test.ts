@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { evaluatePolicy } from '../../src/testing/authorization-test-builder.js';
+import { evaluatePolicy } from '../../src/testing/evaluate-policy.js';
 import { fakePrincipal } from '../../src/testing/fake-principal.js';
 
 describe('evaluatePolicy', () => {

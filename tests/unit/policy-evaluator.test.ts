@@ -3,7 +3,7 @@ import { PolicyComposer } from '../../src/core/composition/policy-composer.js';
 import { PolicyEvaluator } from '../../src/core/evaluation/policy-evaluator.js';
 import type { RoleEvaluator } from '../../src/core/evaluation/role-evaluator.js';
 import { MissingResourceTypeError } from '../../src/errors/missing-resource-type.error.js';
-import { PolicyEvaluationException } from '../../src/errors/policy-evaluation.error.js';
+import { PolicyEvaluationError } from '../../src/errors/policy-evaluation.error.js';
 import { PolicyHandlerNotFoundError } from '../../src/errors/policy-handler-not-found.error.js';
 import { PolicyHandlerRegistry } from '../../src/registry/policy-handler-registry.js';
 import type { AuthorizationContext } from '../../src/core/models/authorization-context.js';
@@ -127,7 +127,7 @@ describe('PolicyEvaluator', () => {
 
   it('rejects tenant without a resource type at composition time', () => {
     expect(() => PolicyComposer.from({ tenant: true })).toThrow(MissingResourceTypeError);
-    expect(() => PolicyComposer.from({ ownership: true })).toThrow(PolicyEvaluationException);
+    expect(() => PolicyComposer.from({ ownership: true })).toThrow(PolicyEvaluationError);
   });
 
   it('throws when a handler is unknown', async () => {
