@@ -1,0 +1,5 @@
+# Generated or tool-owned.
+dist/
+coverage/
+package-lock.json
+example/**/package-lock.json

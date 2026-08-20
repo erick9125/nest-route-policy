@@ -17,6 +17,7 @@ export interface EvaluatePolicyInput {
   readonly defaults?: PolicyDefaults;
   readonly params?: Readonly<Record<string, string>>;
   readonly query?: Readonly<Record<string, unknown>>;
+  readonly body?: Readonly<Record<string, unknown>>;
 }
 
 export async function evaluatePolicy(input: EvaluatePolicyInput): Promise<AuthorizationResult> {
@@ -33,6 +34,7 @@ export async function evaluatePolicy(input: EvaluatePolicyInput): Promise<Author
     params: input.params ?? {},
     query: input.query ?? {},
     request: {},
+    ...(input.body !== undefined ? { body: input.body } : {}),
     ...(input.resource !== undefined ? { resource: input.resource } : {}),
     ...(input.resourceAttributes !== undefined
       ? { resourceAttributes: input.resourceAttributes }

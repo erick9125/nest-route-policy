@@ -4,7 +4,5 @@ import type { AuthorizationDecision } from '../models/authorization-decision.js'
 export interface PolicyHandler {
   readonly name: string;
 
-  evaluate(
-    context: AuthorizationContext,
-  ): AuthorizationDecision | Promise<AuthorizationDecision>;
+  evaluate(context: AuthorizationContext): AuthorizationDecision | Promise<AuthorizationDecision>;
 }

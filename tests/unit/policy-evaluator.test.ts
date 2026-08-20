@@ -18,9 +18,7 @@ function createEvaluator(handlers: PolicyHandler[] = []): PolicyEvaluator {
   return new PolicyEvaluator(registry);
 }
 
-function context(
-  overrides: Partial<AuthorizationContext> = {},
-): AuthorizationContext {
+function context(overrides: Partial<AuthorizationContext> = {}): AuthorizationContext {
   return {
     principal: fakePrincipal({
       id: 'user-1',
@@ -134,10 +132,7 @@ describe('PolicyEvaluator', () => {
 
   it('throws when a handler is unknown', async () => {
     await expect(
-      createEvaluator().evaluate(
-        PolicyComposer.from({ handlers: ['missing'] }),
-        context(),
-      ),
+      createEvaluator().evaluate(PolicyComposer.from({ handlers: ['missing'] }), context()),
     ).rejects.toBeInstanceOf(PolicyHandlerNotFoundError);
   });
 

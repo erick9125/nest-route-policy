@@ -49,9 +49,10 @@
     "test:coverage": "vitest run --coverage",
     "lint": "eslint .",
     "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "verify:package": "node scripts/verify-package-exports.mjs",
-    "check": "npm run lint && npm run typecheck && npm test && npm run build && npm run verify:package",
-    "check:full": "npm run lint && npm run typecheck && npm run test:coverage && npm run build && npm run verify:package",
+    "check": "npm run lint && npm run format:check && npm run typecheck && npm test && npm run build && npm run verify:package",
+    "check:full": "npm run lint && npm run format:check && npm run typecheck && npm run test:coverage && npm run build && npm run verify:package",
     "prepublishOnly": "npm run clean && npm run check:full"
   },
   "keywords": [

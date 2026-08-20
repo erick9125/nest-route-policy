@@ -15,6 +15,11 @@ interface HttpRequestLike {
   readonly user?: unknown;
 }
 
+/**
+ * Reads `request.user` into a principal, or returns `null` when it does not
+ * match the shape. A malformed principal is not an authenticated one, so every
+ * rejection here becomes a deny rather than a partially trusted principal.
+ */
 function toPrincipal(value: unknown): AuthorizationPrincipal | null {
   if (value === null || value === undefined || typeof value !== 'object') {
     return null;
@@ -25,41 +30,48 @@ function toPrincipal(value: unknown): AuthorizationPrincipal | null {
     return null;
   }
 
-  if (hasInvalidOptional(record, 'roles', isStringArray)) {
-    return null;
-  }
-  if (hasInvalidOptional(record, 'scopes', isStringArray)) {
-    return null;
-  }
-  if (hasInvalidOptional(record, 'tenantId', isOptionalString)) {
-    return null;
-  }
-  if (hasInvalidOptional(record, 'attributes', isAttributeRecord)) {
+  const roles = readOptional(record, 'roles', isStringArray);
+  const scopes = readOptional(record, 'scopes', isStringArray);
+  const tenantId = readOptional(record, 'tenantId', isString);
+  const attributes = readOptional(record, 'attributes', isAttributeRecord);
+
+  if (!roles.valid || !scopes.valid || !tenantId.valid || !attributes.valid) {
     return null;
   }
 
   return {
     id: record.id,
-    ...(isStringArray(record.roles) ? { roles: record.roles } : {}),
-    ...(isStringArray(record.scopes) ? { scopes: record.scopes } : {}),
-    ...(typeof record.tenantId === 'string' ? { tenantId: record.tenantId } : {}),
-    ...(isAttributeRecord(record.attributes) ? { attributes: record.attributes } : {}),
+    ...(roles.value !== undefined ? { roles: roles.value } : {}),
+    ...(scopes.value !== undefined ? { scopes: scopes.value } : {}),
+    ...(tenantId.value !== undefined ? { tenantId: tenantId.value } : {}),
+    ...(attributes.value !== undefined ? { attributes: attributes.value } : {}),
   };
 }
 
-function hasInvalidOptional(
+interface OptionalField<T> {
+  readonly valid: boolean;
+  readonly value?: T;
+}
+
+/** Absent is fine, present-and-wrong is not. Reads each field exactly once. */
+function readOptional<T>(
   record: Record<string, unknown>,
   key: string,
-  guard: (value: unknown) => boolean,
-): boolean {
-  return key in record && record[key] !== undefined && !guard(record[key]);
+  guard: (value: unknown) => value is T,
+): OptionalField<T> {
+  const value = record[key];
+  if (value === undefined) {
+    return { valid: true };
+  }
+
+  return guard(value) ? { valid: true, value } : { valid: false };
 }
 
 function isStringArray(value: unknown): value is readonly string[] {
   return Array.isArray(value) && value.every((item) => typeof item === 'string');
 }
 
-function isOptionalString(value: unknown): value is string {
+function isString(value: unknown): value is string {
   return typeof value === 'string';
 }
 

@@ -21,3 +21,16 @@ describe('OwnershipEvaluator', () => {
     expect(result.allowed).toBe(false);
   });
 });
+
+describe('OwnershipEvaluator edge cases', () => {
+  it('denies when the owner id is an empty string', () => {
+    const result = new OwnershipEvaluator().evaluate(fakePrincipal({ id: '10' }), { ownerId: '' });
+    expect(result.allowed).toBe(false);
+    expect(result.violation?.type).toBe('OWNERSHIP_MISMATCH');
+  });
+
+  it('denies when there are no resource attributes at all', () => {
+    const result = new OwnershipEvaluator().evaluate(fakePrincipal({ id: '10' }), undefined);
+    expect(result.allowed).toBe(false);
+  });
+});

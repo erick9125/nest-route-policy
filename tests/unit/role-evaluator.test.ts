@@ -54,3 +54,14 @@ describe('RoleEvaluator', () => {
     expect(result.allowed).toBe(false);
   });
 });
+
+describe('RoleEvaluator empty groups', () => {
+  it('skips an empty group instead of denying on it', () => {
+    const result = new RoleEvaluator().evaluate(
+      [[], ['admin']],
+      fakePrincipal({ roles: ['admin'] }),
+      'any',
+    );
+    expect(result.allowed).toBe(true);
+  });
+});

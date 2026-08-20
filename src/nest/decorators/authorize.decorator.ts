@@ -27,9 +27,14 @@ export const Authorize = (policy: RoutePolicy): MethodDecorator & ClassDecorator
 
 function describe(target: object, propertyKey?: string | symbol): string {
   if (propertyKey === undefined) {
-    return (target as { name?: string }).name ?? 'anonymous class';
+    return nameOf(target);
   }
 
-  const owner = (target as { constructor?: { name?: string } }).constructor?.name ?? 'unknown';
-  return `${owner}.${String(propertyKey)}`;
+  return `${nameOf((target as { constructor?: unknown }).constructor)}.${String(propertyKey)}`;
+}
+
+/** An anonymous class reports `name` as an empty string, not as undefined. */
+function nameOf(value: unknown): string {
+  const name = (value as { name?: unknown } | undefined)?.name;
+  return typeof name === 'string' && name.length > 0 ? name : 'an anonymous class';
 }

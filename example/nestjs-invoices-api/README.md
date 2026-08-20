@@ -8,17 +8,17 @@ header (`x-user`) so the example can focus on authorization.
 
 ## Data
 
-| Invoice    | Tenant   | Owner  | Status    |
-| ---------- | -------- | ------ | --------- |
-| invoice-a  | tenant-a | user-a | pending   |
-| invoice-b  | tenant-b | user-b | pending   |
+| Invoice   | Tenant   | Owner  | Status  |
+| --------- | -------- | ------ | ------- |
+| invoice-a | tenant-a | user-a | pending |
+| invoice-b | tenant-b | user-b | pending |
 
-| User      | Tenant   | Roles   | Scopes                                      |
-| --------- | -------- | ------- | ------------------------------------------- |
-| user-a    | tenant-a |         | `invoice:access`, `invoice:read`            |
-| user-b    | tenant-b |         | `invoice:access`, `invoice:read`            |
+| User      | Tenant   | Roles   | Scopes                                              |
+| --------- | -------- | ------- | --------------------------------------------------- |
+| user-a    | tenant-a |         | `invoice:access`, `invoice:read`                    |
+| user-b    | tenant-b |         | `invoice:access`, `invoice:read`                    |
 | manager-a | tenant-a | manager | `invoice:access`, `invoice:read`, `invoice:approve` |
-| admin-a   | tenant-a | admin   | `invoice:access`, `invoice:read`            |
+| admin-a   | tenant-a | admin   | `invoice:access`, `invoice:read`                    |
 
 ## Run
 

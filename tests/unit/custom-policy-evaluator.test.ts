@@ -26,7 +26,10 @@ describe('CustomPolicyEvaluator', () => {
     registry.register(handler);
 
     const evaluator = new CustomPolicyEvaluator(registry);
-    const violations = await evaluator.evaluate(['invoice.canApprove'], context({ status: 'pending' }));
+    const violations = await evaluator.evaluate(
+      ['invoice.canApprove'],
+      context({ status: 'pending' }),
+    );
     expect(violations).toEqual([]);
   });
 
@@ -38,7 +41,10 @@ describe('CustomPolicyEvaluator', () => {
     });
 
     const evaluator = new CustomPolicyEvaluator(registry);
-    const violations = await evaluator.evaluate(['invoice.canApprove'], context({ status: 'approved' }));
+    const violations = await evaluator.evaluate(
+      ['invoice.canApprove'],
+      context({ status: 'approved' }),
+    );
     expect(violations[0]?.type).toBe('CUSTOM_POLICY_DENIED');
   });
 

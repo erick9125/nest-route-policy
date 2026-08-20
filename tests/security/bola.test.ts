@@ -1,4 +1,4 @@
-import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import {
   Controller,
   Get,
@@ -18,7 +18,7 @@ import { Authorize } from '../../src/nest/decorators/authorize.decorator.js';
 import { AuthorizedResource } from '../../src/nest/decorators/authorized-resource.decorator.js';
 import { RoutePolicyGuard } from '../../src/nest/guards/route-policy.guard.js';
 import { RoutePolicyModule } from '../../src/nest/route-policy.module.js';
-import { createInvoicesApp } from '../fixtures/invoices-app.js';
+import { InvoiceStore, createInvoicesApp } from '../fixtures/invoices-app.js';
 import {
   ADMIN_A,
   INVOICE_A1,
@@ -35,6 +35,10 @@ describe('BOLA / ID manipulation', () => {
 
   beforeAll(async () => {
     app = await createInvoicesApp();
+  });
+
+  beforeEach(() => {
+    app.get(InvoiceStore).reset();
   });
 
   afterAll(async () => {
@@ -86,6 +90,10 @@ describe('roles, scopes, tenant, ownership, and handlers', () => {
     app = await createInvoicesApp();
   });
 
+  beforeEach(() => {
+    app.get(InvoiceStore).reset();
+  });
+
   afterAll(async () => {
     await app?.close();
   });
@@ -95,6 +103,11 @@ describe('roles, scopes, tenant, ownership, and handlers', () => {
       .delete(`/invoices/${INVOICE_B2}`)
       .set('x-user', USER_B)
       .expect(403);
+
+    await request(app.getHttpServer())
+      .delete(`/invoices/${INVOICE_A1}`)
+      .set('x-user', ADMIN_A)
+      .expect(200);
   });
 
   it('denies approve without the manager role or approve scope', async () => {

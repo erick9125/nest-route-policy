@@ -10,11 +10,11 @@ coupling authorization logic to controllers or authentication providers.
 routes and evaluate them against the authenticated principal, resource,
 ownership, tenant, roles, scopes, and custom policy handlers.
 
-| | |
-| ------------- | ----------------------------------------- |
-| Package | `@erickmorales/nest-route-policy` |
+|         |                                      |
+| ------- | ------------------------------------ |
+| Package | `@erickmorales/nest-route-policy`    |
 | Runtime | NestJS HTTP applications, TypeScript |
-| License | MIT |
+| License | MIT                                  |
 
 A Spanish-language summary is available in [README.es.md](README.es.md); this file is the full reference.
 
@@ -187,10 +187,7 @@ Register the module and a global guard:
 
 ```ts
 import { APP_GUARD } from '@nestjs/core';
-import {
-  RoutePolicyModule,
-  RoutePolicyGuard,
-} from '@erickmorales/nest-route-policy/nest';
+import { RoutePolicyModule, RoutePolicyGuard } from '@erickmorales/nest-route-policy/nest';
 
 @Module({
   imports: [
@@ -209,6 +206,13 @@ import {
     }),
   ],
   providers: [
+    // Order matters. Your authentication guard runs first and populates
+    // request.user; RoutePolicyGuard reads it. Registered the other way round,
+    // every protected route denies with 403.
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
     {
       provide: APP_GUARD,
       useExisting: RoutePolicyGuard,
@@ -530,7 +534,7 @@ keeps that check.
   there the transport payload — not the HTTP request — is what the guard would
   read `user` from.
 - Authorization failures return **403 Forbidden** with body
-  `{ "statusCode": 403, "message": "Forbidden" }`.
+  `{ "statusCode": 403, "message": "Forbidden", "error": "Forbidden" }`.
 - Internal reason codes (`TENANT_MISMATCH`, `OWNERSHIP_MISMATCH`, …) stay out
   of the HTTP response.
 - Missing resources return 403, not 404.
@@ -578,17 +582,17 @@ resource instance.
 
 ## Error behavior
 
-| Situation | Result |
-| --------- | ------ |
-| Requirements not met | `403` deny |
-| Unauthenticated principal on a protected route | `403` deny |
-| Resource resolver returns `null` | `403` deny |
-| Unknown resource type or handler | error (typically `500`) |
-| Resolver / handler throws | error (typically `500`) |
-| `resource` without an object-level check | `MissingObjectCheckError` (typically `500`) |
-| Policy on a non-HTTP context | `UnsupportedExecutionContextError` (typically `500`) |
+| Situation                                       | Result                                                 |
+| ----------------------------------------------- | ------------------------------------------------------ |
+| Requirements not met                            | `403` deny                                             |
+| Unauthenticated principal on a protected route  | `403` deny                                             |
+| Resource resolver returns `null`                | `403` deny                                             |
+| Unknown resource type or handler                | error (typically `500`)                                |
+| Resolver / handler throws                       | error (typically `500`)                                |
+| `resource` without an object-level check        | `MissingObjectCheckError` (typically `500`)            |
+| Policy on a non-HTTP context                    | `UnsupportedExecutionContextError` (typically `500`)   |
 | `@AuthorizedResource()` with no resource loaded | `AuthorizedResourceUnavailableError` (typically `500`) |
-| More than one `@Authorize()` on the same target | `DuplicateRoutePolicyError` at module load |
+| More than one `@Authorize()` on the same target | `DuplicateRoutePolicyError` at module load             |
 
 Deny is a valid negative decision. An infrastructure failure is not rewritten
 into a deny, and it is never rewritten into an allow.
