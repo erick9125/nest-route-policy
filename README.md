@@ -107,8 +107,11 @@ Version `0.1.0` covers:
 - resource resolvers and attribute resolvers
 - custom policy handlers
 - deny by default when a policy is present
+- a resource policy that must check the object, or it fails closed
+- claims evaluated before any resource is loaded, so a denied caller costs no query
 - structured internal results with generic HTTP 403 bodies
 - `@AuthorizedResource()` so the guard and the controller share one load
+- an optional structured decision event for audit trails
 - a Nest-free evaluator that can be unit-tested in isolation
 
 It helps enforce consistent object-level authorization policies. It does not
@@ -165,7 +168,7 @@ Peer dependencies, already present in a NestJS app:
 The core evaluator lives on the package root and does not load NestJS. Guards,
 decorators, and the module are imported from `@erickmorales/nest-route-policy/nest`.
 
-`0.1.0` is tested with NestJS 11 on Node 20 and 22, HTTP / Express.
+`0.1.0` is tested with NestJS 10 and 11 on Node 20 and 22, HTTP / Express.
 
 ---
 
@@ -643,12 +646,16 @@ or Fastify.
 
 ## Limitations and roadmap
 
-`0.1.x` supports NestJS HTTP applications.
+`0.1.x` supports NestJS HTTP applications. GraphQL, WebSockets, and
+microservices are not merely unsupported — a policy reached on one of those
+transports fails closed, because the guard cannot tell a request from a
+message payload there. Routes without `@Authorize()` are unaffected on every
+transport, so a hybrid app keeps working.
 
-Not in this release: `forRootAsync`, Fastify-specific tests, GraphQL,
-WebSockets, microservices, role bypass modes, distributed caches, OPA
-adapters, and audit pipelines. Custom `PolicyHandler` implementations are the
-extension point for those later.
+Not in this release: `forRootAsync`, Fastify-specific tests, role bypass modes,
+distributed caches, OPA adapters, and audit pipelines. `PolicyHandler` is the
+extension point for policy logic, and `PolicyEvaluatorCollaborators` for
+changing how a single requirement is evaluated.
 
 ---
 
