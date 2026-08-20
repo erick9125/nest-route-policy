@@ -33,7 +33,7 @@ export { PolicyHandlerRegistry } from './registry/policy-handler-registry.js';
 export { ResourceRegistry } from './registry/resource-registry.js';
 export type { ResourceRegistration } from './registry/resource-registry.js';
 
-export { PolicyEvaluationException } from './errors/policy-evaluation.error.js';
+export { PolicyEvaluationError } from './errors/policy-evaluation.error.js';
 export { ResourceResolverNotFoundError } from './errors/resource-resolver-not-found.error.js';
 export { PolicyHandlerNotFoundError } from './errors/policy-handler-not-found.error.js';
 export { MissingObjectCheckError } from './errors/missing-object-check.error.js';
@@ -42,6 +42,6 @@ export { UnsupportedExecutionContextError } from './errors/unsupported-execution
 export { AuthorizedResourceUnavailableError } from './errors/authorized-resource-unavailable.error.js';
 export { DuplicateRoutePolicyError } from './errors/duplicate-route-policy.error.js';
 
-export { evaluatePolicy } from './testing/authorization-test-builder.js';
-export type { EvaluatePolicyInput } from './testing/authorization-test-builder.js';
+export { evaluatePolicy } from './testing/evaluate-policy.js';
+export type { EvaluatePolicyInput } from './testing/evaluate-policy.js';
 export { fakePrincipal } from './testing/fake-principal.js';

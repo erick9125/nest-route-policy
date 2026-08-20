@@ -58,6 +58,18 @@ Two more configurations fail closed rather than allowing:
   `UnsupportedExecutionContextError` elsewhere. Handlers with no `@Authorize()`
   are unaffected on any transport.
 
+## Error naming
+
+The suffix marks the boundary between a fault and a decision:
+
+- `*Error` — an internal fault, surfacing as a `500`. All of them extend
+  `PolicyEvaluationError`.
+- `*Exception` — a decision NestJS turns into an HTTP response.
+  `RoutePolicyDeniedException` extends `ForbiddenException` and keeps Nest's
+  naming for that role.
+
+Neither ever carries a reason code or a tenant / owner id into the response body.
+
 ## Logging
 
 Safe to log: policy, action, resource type, decision, reason code.

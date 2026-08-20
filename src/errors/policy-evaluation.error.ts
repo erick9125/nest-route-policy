@@ -1,6 +1,6 @@
-export class PolicyEvaluationException extends Error {
+export class PolicyEvaluationError extends Error {
   constructor(message: string, options?: ErrorOptions) {
     super(message, options);
-    this.name = 'PolicyEvaluationException';
+    this.name = 'PolicyEvaluationError';
   }
 }

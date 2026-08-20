@@ -1,6 +1,6 @@
-import { PolicyEvaluationException } from './policy-evaluation.error.js';
+import { PolicyEvaluationError } from './policy-evaluation.error.js';
 
-export class AuthorizedResourceUnavailableError extends PolicyEvaluationException {
+export class AuthorizedResourceUnavailableError extends PolicyEvaluationError {
   constructor() {
     super(
       'No authorized resource is available on the request. ' +
