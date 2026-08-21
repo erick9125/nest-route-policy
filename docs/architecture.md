@@ -20,7 +20,7 @@ Public entry points:
 - `@erickmorales91/nest-route-policy` — core types, evaluator, testing helpers
 - `@erickmorales91/nest-route-policy/nest` — `RoutePolicyModule`, guard, decorators
 
-The HTTP pipeline expected by `0.1.0`:
+The HTTP pipeline expected by `0.1.x`:
 
 ```
 host authentication guard

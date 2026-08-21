@@ -6,7 +6,7 @@ Nest Route Policy helps protect API resources using roles, scopes,
 ownership, tenant boundaries, and custom contextual policies without
 coupling authorization logic to controllers or authentication providers.
 
-**`0.1.0` promise:** define declarative authorization requirements on NestJS
+**`0.1.x` promise:** define declarative authorization requirements on NestJS
 routes and evaluate them against the authenticated principal, resource,
 ownership, tenant, roles, scopes, and custom policy handlers.
 
@@ -96,7 +96,7 @@ custom context
      ALLOW / DENY
 ```
 
-Version `0.1.0` covers:
+Version `0.1.x` covers:
 
 - `@Authorize()` on controllers and methods
 - a NestJS `RoutePolicyGuard`
@@ -128,7 +128,7 @@ It does not issue JWTs, log users in, talk to OAuth, store roles in a database,
 compile a policy language, or replace Passport. Authentication must happen
 before `RoutePolicyGuard` runs.
 
-`0.1.0` does not include GraphQL, WebSockets, microservices, Casbin, OPA,
+`0.1.x` does not include GraphQL, WebSockets, microservices, Casbin, OPA,
 Zanzibar, Redis, audit dashboards, or `forRootAsync`.
 
 ---
@@ -168,7 +168,7 @@ Peer dependencies, already present in a NestJS app:
 The core evaluator lives on the package root and does not load NestJS. Guards,
 decorators, and the module are imported from `@erickmorales91/nest-route-policy/nest`.
 
-`0.1.0` is tested with NestJS 10 and 11 on Node 20 and 22, HTTP / Express.
+`0.1.x` is tested with NestJS 10 and 11 on Node 20 and 22, HTTP / Express.
 
 ---
 
