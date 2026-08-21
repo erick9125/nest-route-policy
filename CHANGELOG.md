@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.1.1
+
+### Fixed
+
+- Published sourcemaps now resolve. They point at `../../src/…`, but `src` was
+  not in the published files, so every map dangled: stepping into the library
+  found no source, and go-to-definition landed on the generated `.d.ts` instead
+  of the TypeScript it came from. `src` ships with the package now.
+
 ## 0.1.0
 
 First release.

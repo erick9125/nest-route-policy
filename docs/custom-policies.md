@@ -1,6 +1,6 @@
 # Custom policies
 
-Custom handlers are TypeScript classes. There is no policy DSL in `0.1.0`.
+Custom handlers are TypeScript classes. There is no policy DSL in `0.1.x`.
 
 ```ts
 @Injectable()
